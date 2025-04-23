@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Juego de Disparos</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <canvas id="gameCanvas" width="400" height="600"></canvas>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let player = { x: 180, y: 550, width: 40, height: 20, speed: 5 };
+    let bullets = [];
+    let enemies = [];
+
+    function drawPlayer() {
+      ctx.fillStyle = 'lime';
+      ctx.fillRect(player.x, player.y, player.width, player.height);
+    }
+
+    function drawBullets() {
+      ctx.fillStyle = 'yellow';
+      bullets.forEach((b, index) => {
+        b.y -= 7;
+        ctx.fillRect(b.x, b.y, 4, 10);
+        if (b.y < 0) bullets.splice(index, 1);
+      });
+    }
+
+    function drawEnemies() {
+      ctx.fillStyle = 'red';
+      enemies.forEach((e, eIndex) => {
+        e.y += 1;
+        ctx.fillRect(e.x, e.y, e.width, e.height);
+
+        bullets.forEach((b, bIndex) => {
+          if (b.x < e.x + e.width && b.x + 4 > e.x &&
+              b.y < e.y + e.height && b.y + 10 > e.y) {
+            enemies.splice(eIndex, 1);
+            bullets.splice(bIndex, 1);
+          }
+        });
+      });
+    }
+
+    function spawnEnemy() {
+      enemies.push({ x: Math.random() * 360, y: -20, width: 40, height: 20 });
+    }
+
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawPlayer();
+      drawBullets();
+      drawEnemies();
+      requestAnimationFrame(gameLoop);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' && player.x > 0) player.x -= player.speed;
+      if (e.key === 'ArrowRight' && player.x + player.width < canvas.width) player.x += player.speed;
+      if (e.key === ' ' || e.key === 'ArrowUp') {
+        bullets.push({ x: player.x + player.width / 2 - 2, y: player.y });
+      }
+    });
+
+    setInterval(spawnEnemy, 1000);
+    gameLoop();
+  </script>
+</body>
+</html>
